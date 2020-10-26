@@ -1,0 +1,110 @@
+---
+title: "Plotting Fixed Effects Solutions For Carcass in routine"
+output: 
+  pdf_document:
+    pandoc_args: [ 
+      "--output=PlotFixEf_routine.pdf" 
+    ]
+vignette: >
+  %\VignetteIndexEntry{Plotting Fixed Effects Solutions For Carcass in routine}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(PlotSolutionEffectsMiX99)
+```
+
+```{r setup-req-pkg, message=FALSE, warning=FALSE, include=FALSE}
+# Pre-Requisites
+require(dplyr)
+require(ggplot2)
+require(readr)
+library(stringr)
+```
+
+# Disclaimer
+Trials to plot fixed effect solutions from routine EBV for Carcass Natura-Beef are shown in this document.
+
+```{r, warning=FALSE, message=FALSE, results='asis', echo=FALSE}
+# Parameters
+vec_dir <- "../inst/extdata/Routine/"
+vec_trait <- c("cca","cfa","cwa","ccc","cfc","cwc")
+sEfname_sex <- "sex"
+sEfname_abattoir <- "abattoir"
+sEfname_classifier <- "classifi"
+
+tbl_sol_fix <- read_solfix(pvec_dir = vec_dir)
+
+```
+
+## Geschlecht
+
+Das Code entspricht folgendes:
+
+* 1 = F
+
+* 2 = M
+
+* 3 = C
+
+```{r, warning=FALSE, message=FALSE, results='asis', echo=FALSE}
+# Plots show the solutions for the different levels of fixed effect SEX
+
+for(sTrait in vec_trait){
+  
+     gg <- ggplot(data = tbl_sol_fix %>% filter(Factor == sEfname_sex & Trait == sTrait), 
+                 aes(x = Level, y=Solution, width=`N-Obs`/2000000)) + 
+            geom_col() + 
+            ggtitle(label = paste0("Merkmal: ",sTrait, " / Fixen Effekt: ",sEfname_sex))
+     print(gg)
+     
+     #ggsave(filename = paste0('solfix_',sTrait,"_",sEfname_sex,'.png'), plot = gg)
+  
+}
+```
+
+## Schlachthof
+
+```{r, warning=FALSE, message=FALSE, results='asis', echo=FALSE}
+# Plots show the solutions for the different levels of fixed effect ABATTOIR
+for(sTrait in vec_trait){
+  
+     gg <- ggplot(data = tbl_sol_fix %>% filter(Factor == sEfname_abattoir & Trait == sTrait), 
+                 aes(x = Level, y=Solution, width=`N-Obs`/500000)) + 
+            geom_col() + 
+            ggtitle(label = paste0("Merkmal: ",sTrait, " / Fixen Effekt: ",sEfname_abattoir))
+     print(gg)
+     
+     #ggsave(filename = paste0('solfix_',sTrait,"_",sEfname_abattoir,'.png'), plot = gg)
+  
+}
+```
+
+## Klassifier
+
+```{r, warning=FALSE, message=FALSE, results='asis', echo=FALSE}
+# Plots show the solutions for the different levels of fixed effect CLASSIFIER
+specific_vec_trait <- c("cca","cfa","ccc","cfc")
+
+for(sTrait in specific_vec_trait){
+  
+     gg <- ggplot(data = tbl_sol_fix %>% filter(Factor == sEfname_classifier & Trait == sTrait), 
+                 aes(x = Level, y=Solution, width=`N-Obs`/80000)) + 
+            geom_col() + 
+            ggtitle(label = paste0("Merkmal: ",sTrait, " / Fixen Effekt: ",sEfname_classifier))
+     
+     print(gg)
+     
+     #ggsave(filename = paste0('solfix_',sTrait,"_",sEfname_classifier,'.png'), plot = gg)
+  
+}
+```
+

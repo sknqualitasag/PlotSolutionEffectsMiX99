@@ -1,0 +1,59 @@
+---
+title: "PlotHerdEfNaturaBeef"
+author: "Sophie Kunz"
+date: "19 6 2020"
+output: 
+  pdf_document:
+    pandoc_args: [ 
+      "--output=PlotHerdEfNaturaBeef.pdf" 
+    ]
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include=FALSE, warning=FALSE}
+library(dplyr)
+library(ggplot2)
+```
+
+# Ausgangslage
+Neben der zufälligen Effekt vom Tier besteht der zufälligen Effekt Betrieb für Natura-Beef. Die Lösung werden angeschaut, ob sie normalverteilt sind.
+
+```{r, include=FALSE, warning=FALSE}
+# Read random effect herd
+s_sol_herd <- "../inst/extdata/NaturaBeef/Solr01"
+tbl_sol_herd <- readr::read_delim(file = s_sol_herd, col_names = FALSE, delim = " ")
+colnames(tbl_sol_herd) <- c("LevelCode","NObs","Sol_ccan","Sol_cfan","Sol_cwan")
+rm(s_sol_herd)
+# Remove spaces from entries in the tibble.
+tbl_sol_herd <- purrr::modify(tbl_sol_herd,  function(x) gsub(pattern = "\\s+", replacement = "", x))
+# Data-types for the columns
+tbl_sol_herd$LevelCode <- as.integer(tbl_sol_herd$LevelCode)
+tbl_sol_herd$NObs <- as.integer(tbl_sol_herd$NObs)
+tbl_sol_herd$Sol_ccan <- as.double(tbl_sol_herd$Sol_ccan)
+tbl_sol_herd$Sol_cfan <- as.double(tbl_sol_herd$Sol_cfan)
+tbl_sol_herd$Sol_cwan <- as.double(tbl_sol_herd$Sol_cwan)
+```
+
+# Lösung von ccan für zufälligen Effekt Betrieb
+
+```{r, echo=FALSE}
+ggplot(data = tbl_sol_herd, aes(x=Sol_ccan)) +
+  geom_histogram(bins = 100)
+```
+
+# Lösung von cfan für zufälligen Effekt Betrieb
+
+```{r, echo=FALSE}
+ggplot(data = tbl_sol_herd, aes(x=Sol_cfan)) +
+  geom_histogram(bins = 100)
+```
+
+# Lösung von cwan für zufälligen Effekt Betrieb
+
+```{r, echo=FALSE}
+ggplot(data = tbl_sol_herd, aes(x=Sol_cwan)) +
+  geom_histogram(bins = 100)
+```

@@ -1,0 +1,168 @@
+---
+title: "Plotting Fixed Effects Solutions For Carcass Bankkaelber"
+author: "Sophie Kunz"
+date: "13 8 2020"
+output:
+    pdf_document:
+    pandoc_args: [
+      "--output=PlotFixEfBK.pdf"
+    ]
+vignette: >
+  %\VignetteIndexEntry{Plotting Fixed Effects Solutions For Carcass Bankkaelber}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(PlotSolutionEffectsMiX99)
+```
+
+```{r setup-req-pkg, message=FALSE, warning=FALSE, include=FALSE}
+# Pre-Requisites
+require(dplyr)
+require(ggplot2)
+require(readr)
+library(stringr)
+```
+
+# Disclaimer
+Trials to plot fixed effect solutions from routine EBV for Carcass Natura-Beef are shown in this document.
+
+```{r, warning=FALSE, message=FALSE, results='asis', echo=FALSE}
+# Parameters
+vec_dir <- "../inst/extdata/Bankkaelber"
+vec_trait <- c("ccco","cfco","cwco")
+vec_path_ef_breedcomb <- "breedCombinationCoder.csv"
+vec_path_ef_sex <- "sexCoder.csv"
+vec_path_ef_abattoir <- "abattoirCoder.csv"
+vec_path_ef_classifier <- "classifierCoder.csv"
+vec_path_ef_yearsaison <- "yearSaisonCoder.csv"
+sEfname_breedcomb <- "breedcom"
+sEfname_sex <- "sex"
+sEfname_abattoir <- "abattoir"
+sEfname_classifier <- "classifi"
+sEfname_yearsaison <- "yearsais"
+```
+
+## Rassenkombination Vaterrasse.Mutterrasse
+
+```{r, warning=FALSE, message=FALSE, results='asis', echo=FALSE}
+# Plots show the solutions for the different levels of fixed effect BREEDCOMBINATION
+for(sTrait in vec_trait){
+
+     gg <- ggplot(data = getcarcass_sol_fx_trait(ptbl_sol_fix = read_solfix(pvec_dir = vec_dir),
+                                                    ptbl_level_code = read_level_code(pvec_path = file.path(vec_dir,vec_path_ef_breedcomb)),
+                                                    psTrait = sTrait,
+                                                    psEffectnameInSolani = sEfname_breedcomb),
+                 aes(x = EffectKey, y=Solution, width=NObs/300000)) +
+            geom_col() +
+            theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+            ggtitle(label = paste0("Merkmal: ",sTrait, " / Fixen Effekt: ",sEfname_breedcomb))
+
+     #ggsave(filename = paste0('solfix_',sTrait,"_",sEfname_breedcomb,'.png'), plot = gg)
+     print(gg)
+
+}
+```
+
+## Geschlecht
+
+```{r, warning=FALSE, message=FALSE, results='asis', echo=FALSE}
+# Plots show the solutions for the different levels of fixed effect SEX
+for(sTrait in vec_trait){
+
+     gg <- ggplot(data = getcarcass_sol_fx_trait(ptbl_sol_fix = read_solfix(pvec_dir = vec_dir),
+                                                    ptbl_level_code = read_level_code(pvec_path = file.path(vec_dir,vec_path_ef_sex)),
+                                                    psTrait = sTrait,
+                                                    psEffectnameInSolani = sEfname_sex),
+                 aes(x = EffectKey, y=Solution, width=NObs/800000)) +
+            geom_col() +
+            ggtitle(label = paste0("Merkmal: ",sTrait, " / Fixen Effekt: ",sEfname_sex))
+     print(gg)
+
+     #ggsave(filename = paste0('solfix_',sTrait,"_",sEfname_sex,'.png'), plot = gg)
+
+}
+```
+
+## Schlachthof
+
+```{r, warning=FALSE, message=FALSE, results='asis', echo=FALSE}
+# Plots show the solutions for the different levels of fixed effect ABATTOIR
+tbl_sol_fix_abat <- read_solfix(pvec_dir = vec_dir)
+
+for(sTrait in vec_trait){
+
+     gg <- ggplot(data = tbl_sol_fix_abat %>% filter(Factor == sEfname_abattoir & Trait == sTrait),
+                 aes(x = Level, y=Solution, width=`N-Obs`/500000)) +
+            geom_col() +
+            ggtitle(label = paste0("Merkmal: ",sTrait, " / Fixen Effekt: ",sEfname_abattoir))
+     print(gg)
+
+     #ggsave(filename = paste0('solfix_',sTrait,"_",sEfname_abattoir,'.png'), plot = gg)
+
+}
+```
+
+## Klassifier
+
+```{r, warning=FALSE, message=FALSE, results='asis', echo=FALSE}
+# Plots show the solutions for the different levels of fixed effect CLASSIFIER
+tbl_sol_fix_clas <- read_solfix(pvec_dir = vec_dir)
+specific_vec_trait <- c("ccco","cfco")
+
+for(sTrait in specific_vec_trait){
+
+     gg <- ggplot(data = tbl_sol_fix_clas %>% filter(Factor == sEfname_classifier & Trait == sTrait),
+                 aes(x = Level, y=Solution, width=`N-Obs`/150000)) +
+            geom_col() +
+            ggtitle(label = paste0("Merkmal: ",sTrait, " / Fixen Effekt: ",sEfname_classifier))
+
+     print(gg)
+
+     #ggsave(filename = paste0('solfix_',sTrait,"_",sEfname_classifier,'.png'), plot = gg)
+
+}
+```
+
+## Jahr*Saison
+
+```{r, warning=FALSE, message=FALSE, results='asis', echo=FALSE}
+# Plots show the solutions for the different levels of fixed effect YEARSAISON
+tbl_level_code_YS <- read_level_code(pvec_path = file.path(vec_dir,vec_path_ef_yearsaison))
+YS <- str_split_fixed(tbl_level_code_YS$EffectKey,"/",2)
+tbl_level_code_YS$Year <- YS[,1]
+tbl_level_code_YS$Season <- YS[,2]
+tbl_level_code_YS <- tbl_level_code_YS %>% mutate(Month = case_when(tbl_level_code_YS$Season == "spring" ~ 3,
+                                                                    tbl_level_code_YS$Season == "summer" ~ 6,
+                                                                    tbl_level_code_YS$Season == "autumn" ~ 9,
+                                                                    tbl_level_code_YS$Season == "winter" ~ 12))
+tbl_level_code_YS <- tbl_level_code_YS %>% arrange(Year) %>% filter(Year > 2008)
+
+for(sTrait in vec_trait){
+
+     gg <- ggplot(data = getcarcass_sol_fx_trait(ptbl_sol_fix = read_solfix(pvec_dir = vec_dir),
+                                                    ptbl_level_code = tbl_level_code_YS,
+                                                    psTrait = sTrait,
+                                                    psEffectnameInSolani = sEfname_yearsaison),
+                 aes(x = Month, y=Solution, fill=as.factor(Month))) +
+            geom_col() +
+            facet_grid(.~Year,scales="free") +
+            theme(axis.title.x=element_blank(),
+                  axis.text.x=element_blank(),
+                  axis.ticks.x=element_blank())
+            ggtitle(label = paste0("Merkmal: ",sTrait, " / Fixen Effekt: ",sEfname_yearsaison))
+
+      print(gg)
+
+     #ggsave(filename = paste0('solfix_',sTrait,"_",sEfname_yearsaison,'.png'), plot = gg)
+
+}
+```
